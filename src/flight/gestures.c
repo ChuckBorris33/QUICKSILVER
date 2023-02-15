@@ -3,6 +3,7 @@
 #include "core/flash.h"
 #include "core/looptime.h"
 #include "core/profile.h"
+#include "core/scheduler.h"
 #include "flight/control.h"
 #include "flight/pid.h"
 #include "flight/sixaxis.h"
@@ -43,7 +44,7 @@ void gestures() {
         number_of_increments[i][j] = 0;
 
     // reset loop time
-    looptime_reset();
+    task_reset_runtime();
     break;
   }
   case GESTURE_UUU: {

@@ -3,9 +3,9 @@
 #include <stdint.h>
 
 #include "core/failloop.h"
+#include "core/looptime.h"
 #include "core/project.h"
 #include "rx/rx.h"
-
 #include "util/vector.h"
 
 #define ANGLE_PID_SIZE 2
@@ -43,10 +43,10 @@ extern control_flags_t flags;
 typedef struct {
   failloop_t failloop;
 
-  uint16_t looptime_autodetect;
+  looptime_t looptime_autodetect;
   float looptime;        // looptime in seconds
-  uint32_t looptime_us;  // looptime in us
   uint32_t loop_counter; // number of loops ran
+  uint32_t looptime_us;  // looptime in us
   float uptime;          // running sum of looptimes
   float armtime;         // running sum of looptimes (while armed)
   uint32_t cpu_load;     // micros we have had left last loop
@@ -107,6 +107,7 @@ typedef struct {
 
 #define STATE_MEMBERS                       \
   MEMBER(failloop, uint8)                   \
+  MEMBER(loop_counter, uint32)              \
   MEMBER(looptime_autodetect, uint16)       \
   MEMBER(looptime, float)                   \
   MEMBER(looptime_us, uint32)               \

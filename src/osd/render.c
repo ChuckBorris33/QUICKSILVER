@@ -9,6 +9,7 @@
 #include "core/looptime.h"
 #include "core/profile.h"
 #include "core/project.h"
+#include "core/scheduler.h"
 #include "driver/osd.h"
 #include "driver/time.h"
 #include "flight/control.h"
@@ -280,8 +281,7 @@ void osd_save_exit() {
     for (int j = 0; j < 3; j++)
       number_of_increments[i][j] = 0;
 
-  // reset loop time - maybe not necessary cause it gets reset in the next screen clear
-  looptime_reset();
+  task_reset_runtime();
 
   if (osd_state.reboot_fc_requested)
     NVIC_SystemReset();

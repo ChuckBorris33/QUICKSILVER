@@ -6,7 +6,7 @@
 #include "core/project.h"
 #include "driver/spi_a7105.h"
 #include "driver/time.h"
-#include "flight/control.h" // for state
+#include "flight/control.h"
 #include "util/util.h"
 
 #if defined(USE_RX_SPI_FLYSKY)

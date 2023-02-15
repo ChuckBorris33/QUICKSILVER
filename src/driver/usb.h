@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "core/project.h"
@@ -12,7 +13,11 @@ extern ring_buffer_t usb_rx_buffer;
 
 void usb_init();
 uint8_t usb_detect();
+
+bool usb_serial_available();
+
 uint32_t usb_serial_read(uint8_t *data, uint32_t len);
 void usb_serial_write(uint8_t *data, uint32_t len);
+
 void usb_serial_printf(const char *fmt, ...);
 void usb_serial_print(char *str);

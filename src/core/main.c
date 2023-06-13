@@ -13,7 +13,6 @@
 #include "driver/fmc.h"
 #include "driver/gpio.h"
 #include "driver/motor.h"
-#include "driver/reset.h"
 #include "driver/rgb_led.h"
 #include "driver/serial.h"
 #include "driver/spi.h"
@@ -96,6 +95,8 @@ __attribute__((__used__)) int main() {
   led_init();
   led_on(LEDALL);
 
+  rgb_led_init();
+
   debug_pin_init();
   buzzer_init();
 
@@ -133,7 +134,6 @@ __attribute__((__used__)) int main() {
 
   rx_init();
   vtx_init();
-  rgb_init();
 
   blackbox_init();
   imu_init();
@@ -174,14 +174,7 @@ __attribute__((__used__)) int main() {
 
     // handle led commands
     led_update();
-
-#if (RGB_LED_NUMBER > 0)
-    // RGB led control
-    rgb_led_lvc();
-#ifdef RGB_LED_DMA
-    rgb_dma_start();
-#endif
-#endif
+    rgb_led_update();
 
     buzzer_update();
     vtx_update();

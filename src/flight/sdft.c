@@ -12,22 +12,26 @@
 // and E. Jacobsen and R. Lyons, “An Update to the Sliding DFT”
 
 #define LOOPTIME_S (state.looptime_autodetect * 1e-6)
-
-#define SWAP(x, y)      \
-  {                     \
-    typeof(x) temp = x; \
-    x = y;              \
-    y = temp;           \
-  }
+#define SAMPLE_HZ (1e6f / state.looptime_autodetect)
 
 static float r_to_N;
 static complex_float twiddle[SDFT_SAMPLE_SIZE];
 
-static const uint32_t bin_min_index = (float)SDFT_MIN_HZ / SDFT_HZ_RESOLUTION + 0.5f;
-static const uint32_t bin_max_index = (float)SDFT_MAX_HZ / SDFT_HZ_RESOLUTION + 0.5f;
-static const uint32_t bin_batches = (bin_max_index - bin_min_index) / SDFT_SUBSAMPLES + 1;
+static uint32_t sub_samples;
+static uint32_t resolution_hz;
+
+static uint32_t bin_min_index;
+static uint32_t bin_max_index;
+static uint32_t bin_batches;
 
 void sdft_init(sdft_t *sdft) {
+  sub_samples = (SAMPLE_HZ / (2.0f * SDFT_MAX_HZ));
+  resolution_hz = ((SAMPLE_HZ / (float)sub_samples) / SDFT_SAMPLE_SIZE);
+
+  bin_min_index = (float)SDFT_MIN_HZ / (float)resolution_hz + 0.5f;
+  bin_max_index = (float)SDFT_MAX_HZ / (float)resolution_hz + 0.5f;
+  bin_batches = (bin_max_index - bin_min_index) / sub_samples + 1;
+
   r_to_N = powf(SDFT_DAMPING_FACTOR, SDFT_SAMPLE_SIZE);
 
   const complex_float j = 0.0f + _Complex_I * 1.0f;
@@ -69,7 +73,7 @@ bool sdft_push(sdft_t *sdft, float val) {
   sdft->sample_accumulator += val;
   sdft->sample_count++;
 
-  if (sdft->sample_count >= (uint32_t)SDFT_SUBSAMPLES) {
+  if (sdft->sample_count >= sub_samples) {
     sdft->sample_avg = sdft->sample_accumulator / (float)sdft->sample_count;
     sdft->sample_accumulator = 0;
     sdft->sample_count = 0;
@@ -194,7 +198,7 @@ bool sdft_update(sdft_t *sdft) {
         meanBin += upper_ratio - lower_ratio;
       }
 
-      const float f_hz = meanBin * SDFT_HZ_RESOLUTION;
+      const float f_hz = meanBin * (float)resolution_hz;
 
       const float filter_multi = constrain(sdft->peak_values[peak] / sdft->noise_floor, 1.0f, 10.0f);
       const float gain = LOOPTIME_S / (1 / (2.0f * M_PI_F * (filter_multi * SDFT_FILTER_HZ)) + LOOPTIME_S);
@@ -208,6 +212,15 @@ bool sdft_update(sdft_t *sdft) {
 
   case SDFT_UPDATE_FILTERS:
     sdft->state = SDFT_UPDATE_MAGNITUE;
+
+    // re-compute in case looptime changed
+    sub_samples = (SAMPLE_HZ / (2.0f * SDFT_MAX_HZ));
+    resolution_hz = ((SAMPLE_HZ / (float)sub_samples) / SDFT_SAMPLE_SIZE);
+
+    bin_min_index = (float)SDFT_MIN_HZ / (float)resolution_hz + 0.5f;
+    bin_max_index = (float)SDFT_MAX_HZ / (float)resolution_hz + 0.5f;
+    bin_batches = (bin_max_index - bin_min_index) / sub_samples + 1;
+
     filters_updated = true;
     break;
   }

@@ -9,6 +9,7 @@
 #include "driver/time.h"
 #include "flight/control.h"
 #include "flight/filter.h"
+#include "io/simulator.h"
 #include "util/util.h"
 
 #define RX_FITER_SAMPLE_TIME (5000)
@@ -151,7 +152,9 @@ void rx_init() {
   case RX_PROTOCOL_IBUS:
   case RX_PROTOCOL_FPORT:
   case RX_PROTOCOL_DSM:
+#ifdef USE_RX_UNIFIED
     rx_serial_init();
+#endif
     break;
 
   case RX_PROTOCOL_NRF24_BAYANG_TELEMETRY:
@@ -216,6 +219,9 @@ void rx_map_channels(const float channels[4]) {
 }
 
 bool rx_check() {
+#ifdef SIMULATOR
+  return simulator_rx_check();
+#else
   switch (profile.receiver.protocol) {
   case RX_PROTOCOL_INVALID:
   case RX_PROTOCOL_MAX:
@@ -227,7 +233,11 @@ bool rx_check() {
   case RX_PROTOCOL_IBUS:
   case RX_PROTOCOL_FPORT:
   case RX_PROTOCOL_DSM:
+#ifdef USE_RX_UNIFIED
     return rx_serial_check();
+#else
+    return false;
+#endif
 
   case RX_PROTOCOL_NRF24_BAYANG_TELEMETRY:
   case RX_PROTOCOL_BAYANG_PROTOCOL_BLE_BEACON:
@@ -278,6 +288,7 @@ bool rx_check() {
   }
 
   return false;
+#endif
 }
 
 void rx_update() {

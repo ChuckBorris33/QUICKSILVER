@@ -106,6 +106,7 @@ void flash_save() {
     fmc_write_buf(offset, buffer, size);
   }
 
+#ifdef USE_VTX
   {
     const uint32_t offset = VTX_STORAGE_OFFSET;
     const uint32_t size = VTX_STORAGE_SIZE;
@@ -125,6 +126,7 @@ void flash_save() {
 
     fmc_write_buf(offset, buffer, size);
   }
+#endif
 
   fmc_lock();
   __enable_irq();
@@ -188,11 +190,11 @@ void flash_load() {
 
     cbor_result_t res = cbor_decode_profile_t(&dec, &profile);
     if (res < CBOR_OK) {
-      fmc_lock();
       failloop(FAILLOOP_FAULT);
     }
   }
 
+#ifdef USE_VTX
   if (fmc_read(VTX_STORAGE_OFFSET) == (FMC_MAGIC | VTX_STORAGE_OFFSET)) {
     const uint32_t offset = VTX_STORAGE_OFFSET + FMC_MAGIC_SIZE;
     const uint32_t size = VTX_STORAGE_SIZE - FMC_MAGIC_SIZE;
@@ -206,8 +208,8 @@ void flash_load() {
 
     cbor_result_t res = cbor_decode_vtx_settings_t(&dec, &vtx_settings);
     if (res < CBOR_OK) {
-      fmc_lock();
       failloop(FAILLOOP_FAULT);
     }
   }
+#endif
 }

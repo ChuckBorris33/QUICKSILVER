@@ -39,7 +39,7 @@ void buzzer_init() {
   gpio_init.mode = GPIO_OUTPUT;
   gpio_init.output = GPIO_PUSHPULL;
   gpio_init.pull = GPIO_NO_PULL;
-  gpio_pin_init( target.buzzer.pin, gpio_init);
+  gpio_pin_init(target.buzzer.pin, gpio_init);
 
   buzzer_off();
 }

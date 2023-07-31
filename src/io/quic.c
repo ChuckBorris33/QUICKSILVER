@@ -151,12 +151,15 @@ static void get_quic(quic_t *quic, cbor_value_t *dec) {
 
     quic_send(quic, QUIC_CMD_GET, QUIC_FLAG_NONE, encode_buffer, cbor_encoder_len(&enc));
     break;
+#ifdef USE_VTX
   case QUIC_VAL_VTX_SETTINGS:
     res = cbor_encode_vtx_settings_t(&enc, &vtx_settings);
     check_cbor_error(QUIC_CMD_GET);
 
     quic_send(quic, QUIC_CMD_GET, QUIC_FLAG_NONE, encode_buffer, cbor_encoder_len(&enc));
     break;
+#endif
+#ifdef USE_MOTOR_DSHOT
   case QUIC_VAL_BLHEL_SETTINGS: {
     quic_send(quic, QUIC_CMD_GET, QUIC_FLAG_STREAMING, encode_buffer, cbor_encoder_len(&enc));
 
@@ -182,6 +185,7 @@ static void get_quic(quic_t *quic, cbor_value_t *dec) {
     quic_send_header(quic, QUIC_CMD_GET, QUIC_FLAG_STREAMING, 0);
     break;
   }
+#endif
   case QUIC_VAL_BIND_INFO: {
     res = cbor_encode_rx_bind_storage_t(&enc, &bind_storage);
     check_cbor_error(QUIC_CMD_GET);
@@ -250,6 +254,7 @@ static void set_quic(quic_t *quic, cbor_value_t *dec) {
     quic_send(quic, QUIC_CMD_SET, QUIC_FLAG_NONE, encode_buffer, cbor_encoder_len(&enc));
     break;
   }
+#ifdef USE_VTX
   case QUIC_VAL_VTX_SETTINGS: {
     vtx_settings_t settings;
 
@@ -265,6 +270,8 @@ static void set_quic(quic_t *quic, cbor_value_t *dec) {
     quic_send(quic, QUIC_CMD_SET, QUIC_FLAG_NONE, encode_buffer, cbor_encoder_len(&enc));
     break;
   }
+#endif
+#ifdef USE_MOTOR_DSHOT
   case QUIC_VAL_BLHEL_SETTINGS: {
     uint8_t count = serial_4way_init();
     time_delay_ms(500);
@@ -289,6 +296,7 @@ static void set_quic(quic_t *quic, cbor_value_t *dec) {
     quic_send(quic, QUIC_CMD_SET, QUIC_FLAG_NONE, encode_buffer, cbor_encoder_len(&enc));
     break;
   }
+#endif
   case QUIC_VAL_BIND_INFO: {
     res = cbor_decode_rx_bind_storage_t(dec, &bind_storage);
     check_cbor_error(QUIC_CMD_SET);
@@ -462,6 +470,7 @@ static void process_motor_test(quic_t *quic, cbor_value_t *dec) {
     quic_send(quic, QUIC_CMD_MOTOR, QUIC_FLAG_NONE, encode_buffer, cbor_encoder_len(&enc));
     break;
   }
+#ifdef USE_MOTOR_DSHOT
   case QUIC_MOTOR_ESC4WAY_IF: {
     uint8_t count = serial_4way_init();
 
@@ -473,6 +482,7 @@ static void process_motor_test(quic_t *quic, cbor_value_t *dec) {
     serial_4way_process();
     break;
   }
+#endif
   default:
     quic_errorf(QUIC_CMD_MOTOR, "INVALID CMD %d", cmd);
     break;

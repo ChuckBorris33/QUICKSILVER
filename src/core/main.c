@@ -29,6 +29,7 @@
 #include "io/buzzer.h"
 #include "io/led.h"
 #include "io/rgb_led.h"
+#include "io/simulator.h"
 #include "io/usb_configurator.h"
 #include "io/vbat.h"
 #include "io/vtx.h"
@@ -100,6 +101,7 @@ __attribute__((__used__)) int main() {
   buzzer_init();
 
   usb_init();
+  simulator_init();
 
   rx_spektrum_bind();
 
@@ -146,6 +148,7 @@ __attribute__((__used__)) int main() {
   while (1) {
     // updates looptime counters & runs auto detect
     looptime_update();
+    simulator_update();
 
     perf_counter_start(PERF_COUNTER_TOTAL);
 

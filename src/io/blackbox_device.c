@@ -6,6 +6,7 @@
 #include "core/project.h"
 #include "io/blackbox_device_flash.h"
 #include "io/blackbox_device_sdcard.h"
+#include "io/blackbox_device_simulator.h"
 #include "util/cbor_helper.h"
 #include "util/util.h"
 
@@ -78,9 +79,16 @@ void blackbox_device_init() {
     target_set_feature(FEATURE_BLACKBOX);
   } else
 #endif
+#ifdef SIMULATOR
+  {
+    dev = &blackbox_device_simulator;
+    target_set_feature(FEATURE_BLACKBOX);
+  }
+#else
   {
     target_reset_feature(FEATURE_BLACKBOX);
   }
+#endif
 
   blackbox_device_header.magic = BLACKBOX_HEADER_MAGIC;
   blackbox_device_header.file_num = 0;
